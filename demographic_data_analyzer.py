@@ -6,7 +6,7 @@ def calculate_demographic_data(print_data=True):
     df = pd.read_csv('adult.data.csv')
 
     # How many of each race are represented in this dataset? This should be a Pandas series with race names as the index labels.
-    race_count = df.groupby(['race'])['race'].count().sort_values(ascending=False).tolist()
+    race_count = df.groupby(['race'])['race'].count().sort_values(ascending=False)
 
     # What is the average age of men?
     average_age_men = round(df[df['sex'] == 'Male']['age'].mean(), 1)
@@ -28,19 +28,23 @@ def calculate_demographic_data(print_data=True):
     lower_education_rich = round((lower_education & salary_upper_50K).sum() / lower_education.sum() * 100, 1)
 
     # What is the minimum number of hours a person works per week (hours-per-week feature)?
-    min_work_hours = None
+    min_work_hours = df['hours-per-week'].min()
 
     # What percentage of the people who work the minimum number of hours per week have a salary of >50K?
-    num_min_workers = None
+    num_min_workers = df['hours-per-week'] == min_work_hours
 
-    rich_percentage = None
+    rich_percentage = round((num_min_workers & salary_upper_50K).sum() / num_min_workers.sum() * 100, 1)
 
     # What country has the highest percentage of people that earn >50K?
-    highest_earning_country = None
-    highest_earning_country_percentage = None
+    country_salary_50K = df[salary_upper_50K].groupby('native-country').size()
+    country_size = df.groupby('native-country').size()
+    country_salary_percent = round(country_salary_50K / country_size * 100, 1).sort_values(ascending=False)
+
+    highest_earning_country = country_salary_percent.keys()[0]
+    highest_earning_country_percentage = country_salary_percent[0]
 
     # Identify the most popular occupation for those who earn >50K in India.
-    top_IN_occupation = None
+    top_IN_occupation = df[salary_upper_50K & (df['native-country'] == 'India')].groupby('occupation').size().sort_values(ascending=False).index[0]
 
     # DO NOT MODIFY BELOW THIS LINE
 
